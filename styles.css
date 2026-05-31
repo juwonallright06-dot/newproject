@@ -1,0 +1,473 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f6f1;
+  --paper: #fffefa;
+  --ink: #151515;
+  --muted: #77736a;
+  --line: #242424;
+  --soft-line: #d8d2c7;
+  --sunday: #9d3333;
+  --saturday: #52627e;
+  --accent: #0f6b64;
+  --football: #0f6b64;
+  --ufc: #9d3333;
+  --worldcup: #5d5695;
+  --font-scale: 1;
+  font-family: Inter, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: calc(16px * var(--font-scale));
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 36px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.brand,
+.toolbar,
+.font-control,
+.filters {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.brand-mark {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.toolbar {
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.icon-button,
+.filter,
+.event-link {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.icon-button {
+  min-width: 38px;
+  height: 34px;
+  padding: 0 11px;
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.icon-button:hover,
+.filter:hover,
+.event-link:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.font-control {
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--soft-line);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.font-control input {
+  width: 92px;
+  accent-color: var(--accent);
+}
+
+.calendar-shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  padding: 26px 28px 28px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.calendar-shell.is-dragging {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.hero-image {
+  grid-column: 1 / -1;
+  min-height: 74px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--soft-line);
+  background-position: center;
+  background-size: cover;
+}
+
+.hero-image.has-image {
+  display: flex;
+  min-height: 150px;
+}
+
+.hero-empty {
+  display: none;
+  padding: 7px 10px;
+  background: rgba(255, 254, 250, 0.86);
+  color: var(--muted);
+  border: 1px solid var(--soft-line);
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.calendar-shell.is-dragging .hero-image {
+  display: flex;
+}
+
+.calendar-shell.is-dragging .hero-empty {
+  display: block;
+}
+
+.month-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 26px;
+}
+
+.month-number {
+  font-size: clamp(4.4rem, 8vw, 6.8rem);
+  line-height: 0.9;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.month-meta {
+  display: grid;
+  gap: 0;
+  color: var(--muted);
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.filters {
+  grid-column: 1 / -1;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: -8px;
+  padding-bottom: 10px;
+}
+
+.filter {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.filter.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.calendar {
+  min-width: 0;
+}
+
+.weekdays,
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.weekdays {
+  border-bottom: 1px solid var(--line);
+}
+
+.weekdays span {
+  padding: 0 12px 12px;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.sun {
+  color: var(--sunday);
+}
+
+.sat {
+  color: var(--saturday);
+}
+
+.day {
+  min-height: 118px;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  border-left: 1px dashed var(--soft-line);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.day:nth-child(7n + 1) {
+  border-left: 0;
+}
+
+.day:hover,
+.day.is-selected {
+  background: #f1eee6;
+}
+
+.day-blank {
+  cursor: default;
+  pointer-events: none;
+}
+
+.day-number {
+  display: block;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.day:nth-child(7n + 1) .day-number {
+  color: var(--sunday);
+}
+
+.day:nth-child(7n) .day-number {
+  color: var(--saturday);
+}
+
+.day-events {
+  display: grid;
+  gap: 5px;
+  margin-top: 11px;
+}
+
+.event-chip {
+  min-width: 0;
+  padding-left: 7px;
+  border-left: 3px solid var(--accent);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.event-chip small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.event-chip[data-type="Football"] {
+  border-color: var(--football);
+}
+
+.event-chip[data-type="UFC"] {
+  border-color: var(--ufc);
+}
+
+.event-chip[data-type="World Cup"] {
+  border-color: var(--worldcup);
+}
+
+.event-panel {
+  align-self: start;
+  display: grid;
+  gap: 18px;
+  min-height: 420px;
+  padding-left: 22px;
+  border-left: 1px solid var(--line);
+}
+
+.panel-kicker {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.event-panel h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.event-list {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.event-card {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--soft-line);
+}
+
+.event-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.event-card strong {
+  font-size: 0.96rem;
+}
+
+.status-badge {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  border: 1px solid var(--soft-line);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.status-badge.is-upcoming {
+  border-color: var(--ufc);
+  color: var(--ufc);
+}
+
+.event-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.event-link {
+  justify-self: start;
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.empty-state {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .toolbar {
+    justify-content: flex-start;
+  }
+
+  .calendar-shell {
+    grid-template-columns: 1fr;
+    padding: 22px 18px;
+  }
+
+  .event-panel {
+    min-height: 0;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .day {
+    min-height: 96px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 620px) {
+  .app {
+    width: min(100% - 18px, 1180px);
+    padding-top: 12px;
+  }
+
+  .calendar-shell {
+    padding: 18px 10px;
+  }
+
+  .month-heading {
+    padding-bottom: 18px;
+  }
+
+  .month-number {
+    font-size: 4.2rem;
+  }
+
+  .weekdays span {
+    padding: 0 2px 9px;
+    font-size: 0.62rem;
+  }
+
+  .day {
+    min-height: 82px;
+    padding: 6px 4px;
+  }
+
+  .event-chip {
+    padding-left: 4px;
+    font-size: 0.62rem;
+  }
+
+  .event-chip small {
+    font-size: 0.6rem;
+  }
+}

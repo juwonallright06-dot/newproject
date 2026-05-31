@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sports Mini Calendar 2026</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app" aria-label="2026 스포츠 경기 캘린더">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Sports Mini Calendar</span>
+        </div>
+        <div class="toolbar" aria-label="캘린더 설정">
+          <button class="icon-button" id="prevMonth" type="button" aria-label="이전 달">‹</button>
+          <button class="icon-button" id="todayMonth" type="button">Today</button>
+          <button class="icon-button" id="nextMonth" type="button" aria-label="다음 달">›</button>
+          <label class="font-control">
+            <span>Text</span>
+            <input id="fontScale" type="range" min="85" max="130" value="100" aria-label="폰트 크기 조절">
+          </label>
+        </div>
+      </header>
+
+      <section class="calendar-shell" id="dropZone" aria-label="이미지 드래그 앤 드롭 영역">
+        <div class="hero-image" id="heroImage" aria-hidden="true">
+          <div class="hero-empty">Drop image</div>
+        </div>
+
+        <section class="month-heading" aria-live="polite">
+          <div class="month-number" id="monthNumber">01</div>
+          <div class="month-meta">
+            <span id="yearLabel">2026</span>
+            <span id="monthName">JANUARY</span>
+          </div>
+        </section>
+
+        <section class="filters" aria-label="종목 필터">
+          <button class="filter is-active" type="button" data-filter="all">ALL</button>
+          <button class="filter" type="button" data-filter="Football">FOOTBALL</button>
+          <button class="filter" type="button" data-filter="UFC">UFC</button>
+          <button class="filter" type="button" data-filter="World Cup">WORLD CUP</button>
+        </section>
+
+        <section class="calendar" aria-label="월간 경기 일정">
+          <div class="weekdays" aria-hidden="true">
+            <span class="sun">SUN</span>
+            <span>MON</span>
+            <span>TUE</span>
+            <span>WED</span>
+            <span>THU</span>
+            <span>FRI</span>
+            <span class="sat">SAT</span>
+          </div>
+          <div class="grid" id="calendarGrid"></div>
+        </section>
+
+        <aside class="event-panel" aria-label="선택한 날짜의 경기">
+          <div>
+            <p class="panel-kicker" id="selectedDate">Select a date</p>
+            <h2>Scheduled matches</h2>
+          </div>
+          <div class="event-list" id="eventList"></div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
