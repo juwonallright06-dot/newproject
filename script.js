@@ -19,6 +19,122 @@ const ufcSource = {
   checkedAt: "2026-05-31"
 };
 
+const footballCsvSources = [
+  {
+    code: "E0",
+    type: "Premier League",
+    country: "England",
+    url: "https://www.football-data.co.uk/mmz4281/2526/E0.csv",
+    officialLink: "https://www.premierleague.com/fixtures"
+  },
+  {
+    code: "SP1",
+    type: "La Liga",
+    country: "Spain",
+    url: "https://www.football-data.co.uk/mmz4281/2526/SP1.csv",
+    officialLink: "https://www.laliga.com/subhome/calendar"
+  }
+];
+
+const footballFixtures2026 = [
+  {
+    id: "pl-fallback-2026-05-03",
+    date: "2026-05-03",
+    time: "15:30 local",
+    type: "Premier League",
+    sportGroup: "Football",
+    leagueCode: "E0",
+    title: "Man United vs Liverpool",
+    homeTeam: "Man United",
+    awayTeam: "Liverpool",
+    venue: "Premier League",
+    city: "England",
+    country: "United Kingdom",
+    status: "FINISHED",
+    link: "https://www.premierleague.com/fixtures"
+  },
+  {
+    id: "pl-fallback-2026-05-09",
+    date: "2026-05-09",
+    time: "12:30 local",
+    type: "Premier League",
+    sportGroup: "Football",
+    leagueCode: "E0",
+    title: "Liverpool vs Chelsea",
+    homeTeam: "Liverpool",
+    awayTeam: "Chelsea",
+    venue: "Premier League",
+    city: "England",
+    country: "United Kingdom",
+    status: "FINISHED",
+    link: "https://www.premierleague.com/fixtures"
+  },
+  {
+    id: "pl-fallback-2026-05-24",
+    date: "2026-05-24",
+    time: "16:00 local",
+    type: "Premier League",
+    sportGroup: "Football",
+    leagueCode: "E0",
+    title: "Final day fixtures",
+    homeTeam: "Premier League",
+    awayTeam: "Final day",
+    venue: "Premier League",
+    city: "England",
+    country: "United Kingdom",
+    status: "FINISHED",
+    link: "https://www.premierleague.com/fixtures"
+  },
+  {
+    id: "laliga-fallback-2026-05-24",
+    date: "2026-05-24",
+    time: "TBD",
+    type: "La Liga",
+    sportGroup: "Football",
+    leagueCode: "SP1",
+    title: "La Liga final matchday",
+    homeTeam: "La Liga",
+    awayTeam: "Final matchday",
+    venue: "LALIGA",
+    city: "Spain",
+    country: "Spain",
+    status: "FINISHED",
+    link: "https://www.laliga.com/subhome/calendar"
+  },
+  {
+    id: "pl-2026-27-release-window",
+    date: "2026-08-15",
+    time: "TBD",
+    type: "Premier League",
+    sportGroup: "Football",
+    leagueCode: "E0",
+    title: "Premier League 2026/27 opening weekend",
+    homeTeam: "Home TBA",
+    awayTeam: "Away TBA",
+    venue: "Premier League",
+    city: "England",
+    country: "United Kingdom",
+    status: "TIMED",
+    link: "https://www.premierleague.com/fixtures"
+  },
+  {
+    id: "laliga-2026-27-release-window",
+    date: "2026-08-16",
+    time: "TBD",
+    type: "La Liga",
+    sportGroup: "Football",
+    leagueCode: "SP1",
+    title: "La Liga 2026/27 opening weekend",
+    homeTeam: "Home TBA",
+    awayTeam: "Away TBA",
+    venue: "LALIGA",
+    city: "Spain",
+    country: "Spain",
+    status: "SCHEDULED",
+    link: "https://www.laliga.com/subhome/calendar"
+  }
+];
+
 const ufcEvents2026 = [
   {
     id: "ufc-324",
@@ -390,8 +506,9 @@ const otherSportsEvents = [
   }
 ];
 
+let importedFootballFixtures = [];
 const todayKey = toDateKey(new Date());
-const events = [...ufcEvents2026, ...otherSportsEvents].map(normalizeEvent);
+const events = [...ufcEvents2026, ...footballFixtures2026, ...otherSportsEvents].map(normalizeEvent);
 const initialDate = new Date();
 const initialMonth = initialDate.getFullYear() === 2026 ? initialDate.getMonth() : 0;
 const initialDay = initialDate.getFullYear() === 2026 ? initialDate : new Date(2026, 0, 1);
@@ -400,6 +517,7 @@ const state = {
   year: 2026,
   month: initialMonth,
   selectedDate: toDateKey(initialDay),
+  posterDate: null,
   filter: "all"
 };
 
@@ -432,6 +550,18 @@ document.querySelector("#todayMonth").addEventListener("click", () => {
   state.month = today.getFullYear() === 2026 ? today.getMonth() : 0;
   state.selectedDate = toDateKey(new Date(2026, state.month, 1));
   render();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Home") {
+    event.preventDefault();
+    changeMonth(-1);
+  }
+
+  if (event.key === "End") {
+    event.preventDefault();
+    changeMonth(1);
+  }
 });
 
 fontScale.addEventListener("input", (event) => {
@@ -499,6 +629,112 @@ function setHeroImage(source) {
   heroImage.classList.add("has-image");
 }
 
+async function loadFootballFixtures() {
+  if (!window.fetch) {
+    return;
+  }
+
+  try {
+    const fixtures = await fetchPublicFootballCsvFixtures();
+    if (fixtures.length) {
+      importedFootballFixtures = fixtures.map(normalizeEvent);
+      render();
+    }
+  } catch (error) {
+    console.info("Using local football fixtures fallback.", error);
+  }
+}
+
+async function fetchPublicFootballCsvFixtures() {
+  const groups = await Promise.all(footballCsvSources.map(async (source) => {
+    const response = await fetch(source.url);
+    if (!response.ok) {
+      throw new Error(`${source.type} CSV failed: ${response.status}`);
+    }
+
+    const rows = parseCsv(await response.text());
+    return rows
+      .map((row, index) => mapFootballCsvRow(row, source, index))
+      .filter(Boolean);
+  }));
+
+  return groups.flat();
+}
+
+function mapFootballCsvRow(row, source, index) {
+  const date = parseFootballCsvDate(row.Date);
+
+  if (!date || !date.startsWith("2026-")) {
+    return null;
+  }
+
+  const homeTeam = row.HomeTeam || "Home TBA";
+  const awayTeam = row.AwayTeam || "Away TBA";
+  const score = row.FTHG !== "" && row.FTAG !== "" ? `${row.FTHG}-${row.FTAG}` : "";
+  const title = score ? `${homeTeam} ${score} ${awayTeam}` : `${homeTeam} vs ${awayTeam}`;
+
+  return {
+    id: `${source.code}-${date}-${index}`,
+    date,
+    time: row.Time ? `${row.Time} local` : "TBD",
+    type: source.type,
+    sportGroup: "Football",
+    leagueCode: source.code,
+    title,
+    homeTeam,
+    awayTeam,
+    venue: source.type,
+    city: source.country,
+    country: source.country,
+    status: score ? "FINISHED" : "SCHEDULED",
+    link: source.officialLink
+  };
+}
+
+function parseCsv(text) {
+  const lines = text.replace(/^\uFEFF/, "").trim().split(/\r?\n/);
+  const headers = splitCsvLine(lines.shift());
+
+  return lines.map((line) => {
+    const values = splitCsvLine(line);
+    return headers.reduce((row, header, index) => {
+      row[header] = values[index] || "";
+      return row;
+    }, {});
+  });
+}
+
+function splitCsvLine(line) {
+  const cells = [];
+  let value = "";
+  let quoted = false;
+
+  for (const char of line) {
+    if (char === "\"") {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      cells.push(value);
+      value = "";
+    } else {
+      value += char;
+    }
+  }
+
+  cells.push(value);
+  return cells;
+}
+
+function parseFootballCsvDate(value) {
+  const parts = value.split("/");
+
+  if (parts.length !== 3) {
+    return "";
+  }
+
+  const [day, month, year] = parts;
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
 function render() {
   monthNumber.textContent = String(state.month + 1).padStart(2, "0");
   monthName.textContent = monthNames[state.month];
@@ -538,6 +774,17 @@ function renderCalendar() {
       button.classList.add("is-selected");
     }
 
+    const featuredEvent = dayEvents[0];
+    const isPosterOpen = Boolean(featuredEvent && dateKey === state.posterDate);
+    const columnIndex = index % 7;
+    const rowIndex = Math.floor(index / 7);
+
+    if (isPosterOpen) {
+      button.classList.add("is-poster-open");
+      button.classList.add(columnIndex >= 5 ? "is-poster-left" : "is-poster-right");
+      button.classList.add(rowIndex >= 3 ? "is-poster-up" : "is-poster-down");
+    }
+
     button.innerHTML = `
       <span class="day-number">${cellDate.getDate()}</span>
       <span class="day-events">
@@ -548,10 +795,12 @@ function renderCalendar() {
           </span>
         `).join("")}
       </span>
+      ${isPosterOpen ? renderEventPoster(featuredEvent) : ""}
     `;
 
     button.addEventListener("click", () => {
       state.selectedDate = dateKey;
+      state.posterDate = dayEvents.length ? dateKey : null;
       render();
     });
 
@@ -585,6 +834,17 @@ function renderEventsForSelectedDate() {
   });
 }
 
+function renderEventPoster(item) {
+  return `
+    <span class="event-poster" data-type="${item.type}" aria-hidden="true">
+      <span class="event-poster-kicker">${item.type}</span>
+      <strong>${item.title}</strong>
+      <span class="event-poster-date">${formatDate(item.date)}</span>
+      <span class="event-poster-meta">${item.time} / ${item.venueLine}</span>
+    </span>
+  `;
+}
+
 function normalizeEvent(event) {
   const source = event.type === "UFC" ? ufcSource : null;
 
@@ -600,19 +860,43 @@ function normalizeEvent(event) {
 }
 
 function getDetailLine(event) {
-  if (event.type !== "UFC") {
-    return event.type;
+  if (event.type === "UFC") {
+    const numberLabel = event.seriesNumber ? `UFC ${event.seriesNumber}` : event.series;
+    return `${numberLabel} / source checked ${ufcSource.checkedAt}`;
   }
 
-  const numberLabel = event.seriesNumber ? `UFC ${event.seriesNumber}` : event.series;
-  return `${numberLabel} / source checked ${ufcSource.checkedAt}`;
+  if (event.sportGroup === "Football") {
+    const matchday = event.matchday ? `Matchday ${event.matchday}` : "2026 fixtures";
+    return `${event.type} / ${matchday} / football-data.co.uk`;
+  }
+
+  return event.type;
 }
 
 function getEventsForDate(dateKey) {
-  return events
+  return getAllEvents()
     .filter((item) => item.date === dateKey)
-    .filter((item) => state.filter === "all" || item.type === state.filter)
+    .filter((item) => {
+      if (state.filter === "all") {
+        return true;
+      }
+
+      if (state.filter === "Football") {
+        return item.sportGroup === "Football" || item.type === "Football";
+      }
+
+      return item.type === state.filter;
+    })
     .sort((a, b) => a.title.localeCompare(b.title));
+}
+
+function getAllEvents() {
+  const footballFallbackIds = new Set(footballFixtures2026.map((event) => event.id));
+  const baseEvents = importedFootballFixtures.length
+    ? events.filter((event) => !footballFallbackIds.has(event.id))
+    : events;
+
+  return [...baseEvents, ...importedFootballFixtures];
 }
 
 function toDateKey(date) {
@@ -633,3 +917,4 @@ function formatDate(dateKey) {
 }
 
 render();
+loadFootballFixtures();

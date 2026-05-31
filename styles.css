@@ -248,6 +248,7 @@ input {
 }
 
 .day {
+  position: relative;
   min-height: 118px;
   padding: 10px;
   border-bottom: 1px solid var(--line);
@@ -255,6 +256,7 @@ input {
   background: transparent;
   text-align: left;
   cursor: pointer;
+  overflow: visible;
 }
 
 .day:nth-child(7n + 1) {
@@ -264,6 +266,10 @@ input {
 .day:hover,
 .day.is-selected {
   background: #f1eee6;
+}
+
+.day.is-poster-open {
+  z-index: 8;
 }
 
 .day-blank {
@@ -312,12 +318,99 @@ input {
   border-color: var(--football);
 }
 
+.event-chip[data-type="Premier League"],
+.event-chip[data-type="La Liga"] {
+  border-color: var(--football);
+}
+
 .event-chip[data-type="UFC"] {
   border-color: var(--ufc);
 }
 
 .event-chip[data-type="World Cup"] {
   border-color: var(--worldcup);
+}
+
+.event-poster {
+  position: absolute;
+  z-index: 20;
+  display: grid;
+  align-content: space-between;
+  gap: 12px;
+  width: calc(200% + 12px);
+  min-height: calc(200% + 12px);
+  padding: 16px;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  background:
+    linear-gradient(145deg, rgba(255, 254, 250, 0.96), rgba(241, 238, 230, 0.96)),
+    radial-gradient(circle at 80% 12%, rgba(15, 107, 100, 0.18), transparent 32%);
+  box-shadow: 0 18px 36px rgba(21, 21, 21, 0.22);
+  color: var(--ink);
+  pointer-events: auto;
+  text-align: left;
+}
+
+.day.is-poster-right .event-poster {
+  left: 8px;
+}
+
+.day.is-poster-left .event-poster {
+  right: 8px;
+}
+
+.day.is-poster-down .event-poster {
+  top: 8px;
+}
+
+.day.is-poster-up .event-poster {
+  bottom: 8px;
+}
+
+.event-poster[data-type="UFC"] {
+  background:
+    linear-gradient(145deg, rgba(255, 254, 250, 0.96), rgba(241, 238, 230, 0.96)),
+    radial-gradient(circle at 82% 14%, rgba(157, 51, 51, 0.24), transparent 34%);
+}
+
+.event-poster[data-type="World Cup"] {
+  background:
+    linear-gradient(145deg, rgba(255, 254, 250, 0.96), rgba(241, 238, 230, 0.96)),
+    radial-gradient(circle at 82% 14%, rgba(93, 86, 149, 0.24), transparent 34%);
+}
+
+.event-poster-kicker,
+.event-poster-date,
+.event-poster-meta {
+  display: block;
+}
+
+.event-poster-kicker {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.event-poster strong {
+  max-width: 100%;
+  font-size: clamp(1rem, 1.6vw, 1.55rem);
+  line-height: 1.02;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.event-poster-date {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.event-poster-meta {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .event-panel {
@@ -460,6 +553,23 @@ input {
   .day {
     min-height: 82px;
     padding: 6px 4px;
+  }
+
+  .event-poster {
+    width: calc(200% + 8px);
+    min-height: calc(200% + 8px);
+    padding: 10px;
+    gap: 7px;
+  }
+
+  .event-poster strong {
+    font-size: 0.86rem;
+  }
+
+  .event-poster-date,
+  .event-poster-meta,
+  .event-poster-kicker {
+    font-size: 0.58rem;
   }
 
   .event-chip {
